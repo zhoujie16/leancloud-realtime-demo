@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="../node_modules/leancloud-storage/dist/av-min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../node_modules/leancloud-realtime/dist/realtime.browser.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+
+	<body>
+	</body>
+	<script type="text/javascript">
+		//LeanCloud初始化
+		const appId = 'kXsSCiOLeoJSKJf0Vqap7Nb6-gzGzoHsz';
+		const appKey = 'OAUDXAnd3YAh1DcHmSWJuwaY';
+		AV.init({
+			appId,
+			appKey
+		});
+		var Realtime = AV.Realtime;
+		var TextMessage = AV.TextMessage;
+		//初始化
+		var realtime = new Realtime({
+			appId: appId,
+			appKey: appKey,
+			region: 'cn', // 美国节点为 "us"
+		});
+		(function() {
+			logIn({
+				username: 'zhoujie',
+				password: 'zhoujie',
+				callback: function(loginedUser) {
+					sendMsg(loginedUser);
+				}
+			})
+
+		}())
+
+		//注册
+		function signUp({
+			username,
+			password,
+			callback
+		}) {
+			//用户注册
+			var user = new AV.User();
+			user.setUsername(username);
+			user.setPassword(password);
+			//user.setEmail(email);
+			user.signUp().then(function(loginedUser) {
+				// 注册成功，跳转到商品 list 页面
+				callback();
+			}, (function(error) {
+				//注册失败 {code,rawMessage}
+				console.log('注册失败', error.rawMessage);
+			}));
+		}
+
+		function logIn({
+			username,
+			password,
+			callback
+		}) {
+			//登录
+			// LeanCloud - 登录
+			AV.User.logIn('zhoujie', 'zhoujie').then(function(loginedUser) {
+				// 登录成功
+				console.log('登录成功', loginedUser);
+				callback(loginedUser)
+			}, function(error) {
+				//登录失败 {code,rawMessage}
+				console.log('登录失败', error.rawMessage);
+			});
+		}
+		//发信息
+		function sendMsg(loginedUser) {
+			console.log('发送消息')
+			realtime.createIMClient(loginedUser.attributes.username).then(function(zhoujie) {
+				//创建对话
+				return zhoujie.createConversation({
+					members: ['zhaojun'],
+					name: 'zj & zj',
+				});
+			}).then(function(conversation) {
+				//发送消息
+				return conversation.send(new AV.TextMessage('哈哈哈！'));
+			}).then(function(message) {
+				//发送成功
+				console.log('发送成功！');
+			}).catch(function() {
+				console.error()
+			});
+		}
+	</script>
+
+</html>
